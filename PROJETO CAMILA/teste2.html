@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal de Documentos</title>
+    
+    <!-- Importando o Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4ppk7mk4Lp5V5f9t+tgVVY1joC8FKhrGcvJD5kRN5oF5xMEnzF5/ZZp5d5e1LjkF" crossorigin="anonymous">
+
+    <!-- Importando jsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <!-- Estilos personalizados -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .sidebar {
+            height: 100vh;
+            background-color: #343a40;
+            padding-top: 30px;
+            color: white;
+            position: fixed;
+            width: 250px;
+        }
+        .sidebar a {
+            display: block;
+            color: white;
+            text-decoration: none;
+            margin: 10px 20px;
+            padding: 10px;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .sidebar a:hover {
+            background-color: #495057;
+        }
+        .content {
+            margin-left: 250px;
+            padding: 30px;
+            background-color: #f8f9fa;
+            height: calc(100vh - 80px); /* Ajustando a altura para o footer */
+            overflow-y: auto;
+        }
+        .form-container {
+            display: none;
+            padding: 20px;
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .form-container.active {
+            display: block;
+        }
+        header {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 0;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .logo {
+            width: 150px;
+            height: auto;
+            padding-left: 20px;
+        }
+        .btn-custom {
+            background-color: #007bff; /* Cor de fundo */
+            border: none; /* Sem borda */
+            color: white; /* Cor do texto */
+            padding: 10px 20px; /* Padding */
+            border-radius: 5px; /* Bordas arredondadas */
+            transition: background-color 0.3s, transform 0.3s; /* Transições */
+        }
+        .btn-custom:hover {
+            background-color: #0056b3; /* Cor ao passar o mouse */
+            transform: scale(1.05); /* Aumentar ligeiramente */
+        }
+        footer {
+            background-color: #343a40; /* Cor de fundo do footer */
+            color: white; /* Cor do texto */
+            text-align: center; /* Centraliza o texto */
+            padding: 10px 0; /* Espaçamento interno */
+            position: relative;
+            bottom: 0;
+            width: 100%;
+        }
+        .orange-link {
+            color: orange; /* Cor laranja para o link */
+            font-weight: bold; /* Negrito */
+        }
+        .skill-block {
+            margin-bottom: 20px; /* Espaçamento entre os blocos */
+            padding: 15px;
+            border: 1px solid #ced4da; /* Borda do bloco */
+            border-radius: 5px; /* Bordas arredondadas */
+            background: #f8f9fa; /* Cor de fundo do bloco */
+        }
+        .form-control {
+            border: 2px solid #007bff; /* Borda azul */
+            border-radius: 5px; /* Bordas arredondadas */
+            padding: 10px; /* Padding */
+            transition: border-color 0.3s; /* Transição para a borda */
+        }
+        .form-control:focus {
+            border-color: #0056b3; /* Borda ao focar */
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Sombra ao focar */
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Cabeçalho -->
+    <header>
+        <img src="logo.png" alt="Logo" class="logo">
+        Portal do Funcionário/Estagiário
+    </header>
+
+    <div class="sidebar">
+        <h2 class="text-center text-light">Documentos</h2>
+        <a href="#" onclick="showDocument('rg')">RG</a>
+        <a href="#" onclick="showDocument('cpf')">CPF</a>
+        <a href="#" onclick="showDocument('pis')">PIS/NIS</a>
+        <a href="#" onclick="showDocument('cnh')">CNH</a>
+        <a href="#" onclick="showDocument('ctps')">Carteira de Trabalho</a>
+        <a href="#" onclick="showDocument('titulo')">Título de Eleitor</a>
+        <a href="#" onclick="showDocument('comprovante')">Comprovante de Residência</a>
+        <a href="#" onclick="showDocument('reservista')">Certificado de Reservista</a>
+        <a href="#" onclick="showDocument('sus')">Cartão SUS</a>
+        <a href="#" onclick="showDocument('transporte')">Cartão Transporte</a>
+        <a href="#" onclick="showDocument('filhos')">Documentos dos Filhos</a>
+        <a href="#" onclick="showDocument('curriculo')">Currículo</a> <!-- Novo documento -->
+        <a href="uber.html" class="orange-link">Carona Fácil (BETA)</a> <!-- Novo documento -->
+    </div>
+
+    <div class="content">
+        <div id="rg" class="form-container">
+            <h2>Emitir RG</h2>
+            <button class="btn btn-custom" onclick="downloadPDF('RG')">Emitir RG</button>
+        </div>
+
+        <div id="cpf" class="form-container">
+            <h2>Emitir CPF</h2>
+            <button class="btn btn-custom" onclick="downloadPDF('CPF')">Emitir CPF</button>
+        </div>
+
+        <div id="pis" class="form-container">
+            <h2>Emitir PIS/NIS</h2>
+            <button class="btn btn-custom" onclick="downloadPDF('PIS/NIS')">Emitir PIS/NIS</button>
+        </div>
+
+        <div id="cnh" class="form-container">
+            <h2>Emitir CNH</h2>
+            <button class="btn btn-custom" onclick="downloadPDF('CNH')">Emitir CNH</button>
+        </div>
+
+        <div id="ctps" class="form-container">
+            <h2>Emitir Carteira de Trabalho</h2>
+            <button class="btn btn-custom" onclick="downloadPDF('Carteira de Trabalho')">Emitir CTPS</button>
+        </div>
+
+        <div id="titulo" class="form-container">
+            <h2>Emitir Título de Eleitor</h2>
+            <button class="btn btn-custom" onclick="downloadPDF('Título de Eleitor')">Emitir Título de Eleitor</button>
+        </div>
+
+        <div id="comprovante" class="form-container">
+            <h2>Emitir Comprovante de Residência</h2>
+            <button class="btn btn-custom" onclick="downloadPDF('Comprovante de Residência')">Emitir Comprovante</button>
+        </div>
+
+        <div id="reservista" class="form-container">
+            <h2>Emitir Certificado de Reservista</h2>
+            <button class="btn btn-custom" onclick="downloadPDF('Certificado de Reservista')">Emitir Certificado</button>
+        </div>
+
+        <div id="sus" class="form-container">
+            <h2>Emitir Cartão SUS</h2>
+            <button class="btn btn-custom" onclick="downloadPDF('Cartão SUS')">Emitir Cartão SUS</button>
+        </div>
+
+        <div id="transporte" class="form-container">
+            <h2>Emitir Cartão Transporte</h2>
+            <button class="btn btn-custom" onclick="downloadPDF('Cartão Transporte')">Emitir Cartão Transporte</button>
+        </div>
+
+        <div id="filhos" class="form-container">
+            <h2>Emitir Documentos dos Filhos</h2>
+            <button class="btn btn-custom" onclick="downloadPDF('Documentos dos Filhos')">Emitir Documento</button>
+        </div>
+
+        <div id="curriculo" class="form-container active">
+            <h2>Emitir Currículo</h2>
+            <div class="skill-block">
+                <h4>Soft Skills</h4>
+                <textarea id="softSkills" class="form-control" rows="5" placeholder="Digite suas soft skills..."></textarea>
+            </div>
+            <div class="skill-block">
+                <h4>Hard Skills</h4>
+                <textarea id="hardSkills" class="form-control" rows="5" placeholder="Digite suas hard skills..."></textarea>
+            </div>
+            <button class="btn btn-custom" onclick="downloadCurriculo()">Emitir Currículo</button>
+        </div>
+    </div>
+
+    <footer>
+        &copy; 2024 - Todos os direitos reservados.
+    </footer>
+
+    <script>
+        function showDocument(docId) {
+            const forms = document.querySelectorAll('.form-container');
+            forms.forEach(form => {
+                form.classList.remove('active');
+            });
+            document.getElementById(docId).classList.add('active');
+        }
+
+        async function downloadPDF(documentName) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.text(`Emitindo ${documentName}...`, 20, 20);
+            doc.save(`${documentName}.pdf`);
+        }
+
+        async function downloadCurriculo() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            const softSkills = document.getElementById('softSkills').value;
+            const hardSkills = document.getElementById('hardSkills').value;
+
+            doc.text(`Currículo`, 20, 20);
+            doc.text(`Soft Skills: ${softSkills}`, 20, 30);
+            doc.text(`Hard Skills: ${hardSkills}`, 20, 40);
+            doc.save('Curriculo.pdf');
+        }
+    </script>
+</body>
+</html>
+    

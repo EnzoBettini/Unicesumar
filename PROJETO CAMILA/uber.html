@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carona Fácil</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,500,700" />
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Roboto', sans-serif;
+            background-color: hsl(0, 0%, 100%); /* Fundo laranja */
+        }
+        #map {
+            height: 400px;
+            width: 100%;
+            background-color: #e9ecef;
+        }
+        footer {
+            background-color: #343a40; /* Cor de fundo do footer */
+            color: white; /* Cor do texto */
+            text-align: center; /* Centraliza o texto */
+            padding: 10px 0; /* Espaçamento interno */
+            position: relative;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="#">Carona Fácil</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav"
+            aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="teste2.html">Documentos</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#mapSection">Mapa</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#routeSection">Gerar Rota</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="uber.html">Carona Fácil</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <div id="mapSection" class="my-5">
+            <h2>Mapa de Localização</h2>
+            <p>Visualize o mapa e selecione o local de partida e destino:</p>
+            <div id="map"></div>
+        </div>
+
+        <div id="routeSection" class="my-5">
+            <h2>Gerar Rota</h2>
+            <form>
+                <div class="form-group">
+                    <label for="startLocation">Local de Partida</label>
+                    <input type="text" class="form-control" id="startLocation" placeholder="Digite o endereço de partida">
+                </div>
+                <div class="form-group">
+                    <label for="endLocation">Destino</label>
+                    <select class="form-control" id="endLocation">
+                        <option value="-23.440880,-51.917523">UNICESUMAR</option>
+                        <option value="-23.365683,-51.901242">UNINGA</option>
+                        <option value="-23.406570,-51.938772">UEM</option>
+                    </select>
+                </div>
+                <button type="button" class="btn btn-primary" onclick="generateRoute()">Gerar Rota</button>
+            </form>
+        </div>
+    </div>
+
+    <footer>
+        <p>© 2024 Feito por: Filipe Ruiz, Enzo Bettini e Gabriel Galhardone</p>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
+    <script>
+        // Inicializa o mapa
+        var map = L.map('map').setView([-23.420999, -51.933056], 13);
+        var routingControl; // Variável para armazenar o controle de rota
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        function generateRoute() {
+            var origin = document.getElementById('startLocation').value;
+            var destinationCoords = document.getElementById('endLocation').value.split(',');
+
+            // Limpa a rota anterior, se houver
+            if (routingControl) {
+                map.removeControl(routingControl);
+            }
+
+            // Geocodifica o endereço de origem
+            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(origin)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data && data.length > 0) {
+                        var originCoords = [parseFloat(data[0].lat), parseFloat(data[0].lon)];
+
+                        // Adiciona marcadores para a origem e o destino
+                        L.marker(originCoords).addTo(map).bindPopup('Local de Partida').openPopup();
+                        L.marker([parseFloat(destinationCoords[0]), parseFloat(destinationCoords[1])]).addTo(map).bindPopup('Destino').openPopup();
+
+                        // Gera a rota
+                        routingControl = L.Routing.control({
+                            waypoints: [
+                                L.latLng(originCoords[0], originCoords[1]), 
+                                L.latLng(parseFloat(destinationCoords[0]), parseFloat(destinationCoords[1]))
+                            ],
+                            routeWhileDragging: true,
+                            lineOptions: {
+                                styles: [{ color: '#6FA1FC', opacity: 0.9, weight: 4 }] // Estilo da linha da rota
+                            },
+                            fitSelectedRoutes: false // Não ajusta a visualização para incluir a rota
+                        }).addTo(map);
+
+                        // Oculta a linha da rota
+                        routingControl._container.style.display = 'none';
+                        
+                        // Ajusta o mapa para mostrar a rota
+                        map.fitBounds(routingControl.getWaypoints().map(wp => wp.latLng));
+                    } else {
+                        alert('Não foi possível encontrar a localização da origem');
+                    }
+                }).catch(error => {
+                    console.error('Erro na geocodificação:', error);
+                    alert('Ocorreu um erro ao tentar encontrar a localização');
+                });
+        }
+    </script>
+</body>
+</html>
